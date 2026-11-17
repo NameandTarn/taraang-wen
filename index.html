@@ -152,14 +152,28 @@
                     <i class="fa-solid fa-calendar-plus"></i>
                 </div>
                 <h3 class="font-bold text-lg mb-1">พร้อมบันทึกหรือยัง?</h3>
-                <p class="text-xs text-indigo-200 mb-4">นำเวรทั้งหมดที่เลือกลงใน Calendar มือถือของคุณ</p>
+                <p class="text-xs text-indigo-200 mb-4">เลือกวิธีลงปฏิทินในมือถือ/คอมพิวเตอร์ของคุณ</p>
                 
-                <div class="space-y-2 relative z-10">
-                    <button id="exportIcsBtn" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-3 px-4 rounded-xl shadow-lg transition flex items-center justify-center space-x-2 active:scale-95">
+                <div class="space-y-2.5 relative z-10">
+                    <!-- Option 1: Mobile Share Sheet (Select Calendar App Yourself) -->
+                    <button id="exportShareBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 px-4 rounded-xl shadow transition flex items-center justify-center space-x-2 active:scale-95 text-xs sm:text-sm ring-2 ring-indigo-400">
+                        <i class="fa-solid fa-share-nodes text-lg text-indigo-200"></i>
+                        <span class="font-bold">ส่งเข้าแอปปฏิทิน (เลือกแอปในมือถือเอง)</span>
+                    </button>
+
+                    <!-- Option 2: Direct Google Calendar Link -->
+                    <button id="exportGoogleBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-xl shadow transition flex items-center justify-center space-x-2 active:scale-95 text-xs sm:text-sm">
+                        <i class="fa-brands fa-google text-lg"></i>
+                        <span>เปิดด้วย Google Calendar Web</span>
+                    </button>
+
+                    <!-- Option 3: Download Standard .ICS File -->
+                    <button id="exportIcsBtn" class="w-full bg-slate-700 hover:bg-slate-800 text-white font-medium py-2.5 px-4 rounded-xl shadow transition flex items-center justify-center space-x-2 active:scale-95 text-xs sm:text-sm">
                         <i class="fa-solid fa-file-arrow-down text-lg"></i>
                         <span>ดาวน์โหลดไฟล์ Calendar (.ics)</span>
                     </button>
-                    <p class="text-[11px] text-indigo-300 text-center">เปิดไฟล์ .ics เพื่อซิงค์เข้า iPhone, Android, Google Calendar ได้ทันที</p>
+
+                    <p class="text-[11px] text-indigo-300 text-center pt-1">💡 แนะนำกดปุ่มสีฟ้าแถบบนสุด ระบบจะเด้งหน้าต่างให้เลือกแอปปฏิทินในเครื่องของคุณทันที</p>
                 </div>
             </div>
 
@@ -223,16 +237,28 @@
                             <span class="text-slate-600">ดึก: <strong id="cntNight" class="text-slate-900">0</strong></span>
                         </div>
                     </div>
-
-                    <button id="clearMonthShiftsBtn" class="text-slate-400 hover:text-red-500 transition font-medium flex items-center space-x-1">
-                        <i class="fa-regular fa-trash-can"></i>
-                        <span>ล้างตารางเดือนนี้</span>
+                    <button id="clearMonthShiftsBtn" class="text-red-500 hover:text-red-700 font-medium hover:underline flex items-center space-x-1 transition">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>ล้างเวรเดือนนี้</span>
                     </button>
                 </div>
 
             </div>
         </section>
+
     </main>
+
+    <!-- Floating Bottom Bar for Mobile -->
+    <div class="lg:hidden fixed bottom-3 left-3 right-3 z-40 bg-slate-900/95 backdrop-blur-md text-white p-3 rounded-2xl shadow-2xl flex items-center justify-between border border-slate-700/50">
+        <div class="flex items-center space-x-2 pl-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-xs font-medium" id="mobileShiftSummary">0 เวรเลือกอยู่</span>
+        </div>
+        <button id="mobileExportBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow flex items-center space-x-1.5 active:scale-95">
+            <i class="fa-solid fa-share-nodes"></i>
+            <span>เลือกแอปปฏิทิน</span>
+        </button>
+    </div>
 
     <!-- Help Modal -->
     <div id="helpModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
@@ -263,7 +289,7 @@
 
                 <div class="p-3 bg-emerald-50 rounded-xl text-emerald-900">
                     <strong>การนำเข้าสู่ Calendar ในมือถือ:</strong>
-                    <p class="mt-1">กดปุ่ม <strong>"ดาวน์โหลดไฟล์ Calendar (.ics)"</strong> เมื่อได้ไฟล์แล้ว ให้แตะเปิดไฟล์นั้นในมือถือ ระบบจะถามเพื่อกด "Add All Events" เข้าปฏิทินมือถือทันที!</p>
+                    <p class="mt-1">กดปุ่ม <strong>"เปิดใน Apple Calendar"</strong> หรือ <strong>"ดาวน์โหลดไฟล์ Calendar (.ics)"</strong> แล้วเลือกเปิดด้วยแอป Calendar ระบบจะพาเข้าปฏิทินมือถือทันที!</p>
                 </div>
             </div>
 
@@ -328,7 +354,6 @@
         let currentDate = new Date(); // Controls month/year view
         
         // Storage Structure: { 'YYYY-MM-DD': ['morning', 'afternoon'] }
-        // Allows multiple shifts in the same day if needed
         let shiftsData = JSON.parse(localStorage.getItem('shift_scheduler_data')) || {};
 
         // Month Names in Thai
@@ -341,6 +366,7 @@
         const calendarDaysEl = document.getElementById('calendarDays');
         const currentMonthYearEl = document.getElementById('currentMonthYear');
         const shiftCountBadgeEl = document.getElementById('shiftCountBadge');
+        const mobileShiftSummaryEl = document.getElementById('mobileShiftSummary');
         const cntMorningEl = document.getElementById('cntMorning');
         const cntAfternoonEl = document.getElementById('cntAfternoon');
         const cntNightEl = document.getElementById('cntNight');
@@ -348,6 +374,9 @@
         const nextMonthBtn = document.getElementById('nextMonthBtn');
         const todayBtn = document.getElementById('todayBtn');
         const exportIcsBtn = document.getElementById('exportIcsBtn');
+        const exportGoogleBtn = document.getElementById('exportGoogleBtn');
+        const exportShareBtn = document.getElementById('exportShareBtn');
+        const mobileExportBtn = document.getElementById('mobileExportBtn');
         const clearMonthShiftsBtn = document.getElementById('clearMonthShiftsBtn');
         const smartPasteInput = document.getElementById('smartPasteInput');
         const applySmartPasteBtn = document.getElementById('applySmartPasteBtn');
@@ -355,12 +384,145 @@
         const quickHelpBtn = document.getElementById('quickHelpBtn');
         const closeHelpBtn = document.getElementById('closeHelpBtn');
         const understandBtn = document.getElementById('understandBtn');
+        // --- Generate iCalendar (.ics) Content String ---
+        function generateICSString() {
+            const keys = Object.keys(shiftsData);
+            if (keys.length === 0) return null;
 
-        // --- Init Function ---
-        function initApp() {
-            setupShiftTypeSelector();
-            renderCalendar();
-            setupEventListeners();
+            let icsContent = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//Shift Scheduler Assistant//TH',
+                'CALSCALE:GREGORIAN',
+                'METHOD:PUBLISH',
+                'X-WR-CALNAME:ตารางเวร'
+            ];
+
+            keys.forEach(dateStr => {
+                const dayShifts = shiftsData[dateStr];
+                const [y, m, d] = dateStr.split('-');
+
+                dayShifts.forEach(shiftType => {
+                    const shiftInfo = SHIFT_TYPES[shiftType];
+                    if (!shiftInfo) return;
+
+                    let startYear = parseInt(y, 10);
+                    let startMonth = parseInt(m, 10) - 1;
+                    let startDay = parseInt(d, 10);
+
+                    let startDate = new Date(startYear, startMonth, startDay, shiftInfo.startHour, 0, 0);
+                    let endDate = new Date(startDate);
+                    
+                    if (shiftInfo.endHour === 24) {
+                        endDate.setDate(endDate.getDate() + 1);
+                        endDate.setHours(0, 0, 0);
+                    } else {
+                        endDate.setHours(shiftInfo.endHour, 0, 0);
+                    }
+
+                    const dtStart = formatICSTime(startDate);
+                    const dtEnd = formatICSTime(endDate);
+                    const uid = `shift-${dateStr}-${shiftType}-${Math.random().toString(36).substr(2, 9)}@shiftscheduler`;
+
+                    icsContent.push(
+                        'BEGIN:VEVENT',
+                        `UID:${uid}`,
+                        `SUMMARY:${shiftInfo.label} (${shiftInfo.startTime} - ${shiftInfo.endTime})`,
+                        `DESCRIPTION:ปฏิบัติงาน ${shiftInfo.label} เวลา ${shiftInfo.startTime} - ${shiftInfo.endTime} น.`,
+                        `DTSTART:${dtStart}`,
+                        `DTEND:${dtEnd}`,
+                        'STATUS:CONFIRMED',
+                        'END:VEVENT'
+                    );
+                });
+            });
+
+            icsContent.push('END:VCALENDAR');
+            return icsContent.join('\r\n');
+        }
+
+        // --- Native Mobile Share Sheet (Allows Selecting Any Calendar App) ---
+        async function shareToCalendarApp() {
+            const icsString = generateICSString();
+            if (!icsString) {
+                showToast('ยังไม่มีข้อมูลเวรให้ลงบันทึก', 'warning');
+                return;
+            }
+
+            const fileName = `taraang-wen-${currentDate.getFullYear()}-${currentDate.getMonth() + 1}.ics`;
+            const blob = new Blob([icsString], { type: 'text/calendar' });
+            const file = new File([blob], fileName, { type: 'text/calendar' });
+
+            // Check if Web Share API with files is supported (iOS Safari / Android Chrome)
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: 'นำเข้าตารางเวร',
+                        text: 'ลงเวรในปฏิทินของคุณ'
+                    });
+                    showToast('ส่งไฟล์ไปยังแอปปฏิทินเรียบร้อย', 'success');
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        exportToICS(); // Fallback if user cancels or error
+                    }
+                }
+            } else {
+                // Direct Download Fallback for older browsers
+                exportToICS();
+            }
+        }
+
+        // --- Direct Export to Google Calendar Web Link ---
+        function exportToGoogleCalendar() {
+            const keys = Object.keys(shiftsData);
+            if (keys.length === 0) {
+                showToast('ยังไม่มีข้อมูลเวรให้ลงบันทึก', 'warning');
+                return;
+            }
+
+            const firstDateStr = keys[0];
+            const firstShift = shiftsData[firstDateStr][0];
+            const shiftInfo = SHIFT_TYPES[firstShift];
+            const [y, m, d] = firstDateStr.split('-');
+
+            let startObj = new Date(parseInt(y), parseInt(m)-1, parseInt(d), shiftInfo.startHour, 0, 0);
+            let endObj = new Date(startObj);
+            if (shiftInfo.endHour === 24) {
+                endObj.setDate(endObj.getDate() + 1);
+                endObj.setHours(0,0,0);
+            } else {
+                endObj.setHours(shiftInfo.endHour, 0, 0);
+            }
+
+            const formatGTime = (date) => date.toISOString().replace(/-|:|\.\d\d\d/g, "");
+            const gUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(shiftInfo.label)}&dates=${formatGTime(startObj)}/${formatGTime(endObj)}&details=${encodeURIComponent('ปฏิบัติงาน ' + shiftInfo.label)}`;
+
+            if (keys.length === 1 && shiftsData[firstDateStr].length === 1) {
+                window.open(gUrl, '_blank');
+                showToast('กำลังเปิด Google Calendar...', 'success');
+            } else {
+                shareToCalendarApp();
+            }
+        }
+
+        // --- Export to iCalendar (.ics) File Download ---
+        function exportToICS() {
+            const icsString = generateICSString();
+            if (!icsString) {
+                showToast('ยังไม่มีข้อมูลเวรให้ลงบันทึก', 'warning');
+                return;
+            }
+
+            const blob = new Blob([icsString], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.setAttribute('download', `taraang-wen-${currentDate.getFullYear()}-${currentDate.getMonth() + 1}.ics`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('ดาวน์โหลดไฟล์ .ics เรียบร้อย! กดเปิดไฟล์เพื่อเลือกแอปปฏิทิน', 'success');
         }
 
         // --- Shift Type Selection Visual Sync ---
@@ -380,7 +542,6 @@
 
                 btn.addEventListener('click', () => {
                     activeShiftType = shiftKey;
-                    // Highlight selected button
                     buttons.forEach(b => {
                         b.classList.remove('ring-2', 'ring-indigo-500', 'shadow-md');
                         const bBadge = b.querySelector('.shift-badge');
@@ -390,6 +551,100 @@
                     if (badge) badge.className = `shift-badge w-4 h-4 rounded-full border border-indigo-500 bg-indigo-600`;
                 });
             });
+        }
+
+        // --- Handle Day Cell Click ---
+        function handleDayClick(dateKey) {
+            if (!shiftsData[dateKey]) {
+                shiftsData[dateKey] = [];
+            }
+
+            if (activeShiftType === 'erase') {
+                // Clear all shifts for this day
+                delete shiftsData[dateKey];
+                showToast('ลบเวรสำหรับวันนี้เรียบร้อย', 'info');
+            } else {
+                // Toggle or Set Shift
+                const existingIndex = shiftsData[dateKey].indexOf(activeShiftType);
+                if (existingIndex > -1) {
+                    // Remove if already exists
+                    shiftsData[dateKey].splice(existingIndex, 1);
+                    if (shiftsData[dateKey].length === 0) delete shiftsData[dateKey];
+                } else {
+                    // Add shift
+                    shiftsData[dateKey].push(activeShiftType);
+                }
+            }
+
+            renderCalendar();
+        }
+
+        // --- Smart Text Parser Function ---
+        function parseSmartInput() {
+            const text = smartPasteInput.value.trim();
+            if (!text) {
+                showToast('กรุณากรอกหรือวางข้อความเวรที่ต้องการลง', 'warning');
+                return;
+            }
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth() + 1;
+            let addedCount = 0;
+
+            // Simple regex parser for shifts
+            // Format example: "เช้า: 1, 2, 5 บ่าย: 10, 12, 15"
+            const morningMatch = text.match(/(?:เช้า|morning)[^\d]*([\d\s,]+)/i);
+            const afternoonMatch = text.match(/(?:บ่าย|afternoon)[^\d]*([\d\s,]+)/i);
+            const nightMatch = text.match(/(?:ดึก|night)[^\d]*([\d\s,]+)/i);
+
+            const processDays = (matchStr, type) => {
+                if (matchStr && matchStr[1]) {
+                    const days = matchStr[1].match(/\d+/g);
+                    if (days) {
+                        days.forEach(d => {
+                            const dayNum = parseInt(d, 10);
+                            if (dayNum >= 1 && dayNum <= 31) {
+                                const key = formatDateKey(year, month, dayNum);
+                                if (!shiftsData[key]) shiftsData[key] = [];
+                                if (!shiftsData[key].includes(type)) {
+                                    shiftsData[key].push(type);
+                                    addedCount++;
+                                }
+                            }
+                        });
+                    }
+                }
+            };
+
+            processDays(morningMatch, 'morning');
+            processDays(afternoonMatch, 'afternoon');
+            processDays(nightMatch, 'night');
+
+            // Fallback: If no shift keyword found, search for pure numbers and assign active shift type
+            if (addedCount === 0) {
+                const numbers = text.match(/\d+/g);
+                if (numbers) {
+                    numbers.forEach(d => {
+                        const dayNum = parseInt(d, 10);
+                        if (dayNum >= 1 && dayNum <= 31) {
+                            const key = formatDateKey(year, month, dayNum);
+                            if (!shiftsData[key]) shiftsData[key] = [];
+                            if (!shiftsData[key].includes(activeShiftType)) {
+                                shiftsData[key].push(activeShiftType);
+                                addedCount++;
+                            }
+                        }
+                    });
+                }
+            }
+
+            if (addedCount > 0) {
+                renderCalendar();
+                smartPasteInput.value = '';
+                showToast(`ลงเวรจากข้อความสำเร็จ ${addedCount} รายการ!`, 'success');
+            } else {
+                showToast('ไม่พบตัวเลขวันที่ในข้อความที่กรอก', 'warning');
+            }
         }
 
         // --- Render Calendar ---
@@ -475,6 +730,7 @@
 
             // Update Badges & Counters
             shiftCountBadgeEl.textContent = `${monthShiftCount} เวร`;
+            if (mobileShiftSummaryEl) mobileShiftSummaryEl.textContent = `${monthShiftCount} เวรพร้อมลง`;
             cntMorningEl.textContent = morningCnt;
             cntAfternoonEl.textContent = afternoonCnt;
             cntNightEl.textContent = nightCnt;
@@ -483,99 +739,42 @@
             saveShiftsData();
         }
 
-        // --- Handle Day Click ---
-        function handleDayClick(dateKey) {
-            let currentShifts = shiftsData[dateKey] ? [...shiftsData[dateKey]] : [];
-
-            if (activeShiftType === 'erase') {
-                // Clear all shifts for this day
-                delete shiftsData[dateKey];
-                showToast('ลบเวรในวันนี้แล้ว', 'info');
-            } else {
-                // Toggle active shift
-                if (currentShifts.includes(activeShiftType)) {
-                    // Remove if already exists
-                    currentShifts = currentShifts.filter(s => s !== activeShiftType);
-                } else {
-                    // Add shift (limit max 2 shifts per day for logical sense)
-                    if (currentShifts.length < 2) {
-                        currentShifts.push(activeShiftType);
-                    } else {
-                        currentShifts = [activeShiftType]; // Overwrite if too many
-                    }
-                }
-
-                if (currentShifts.length > 0) {
-                    shiftsData[dateKey] = currentShifts;
-                } else {
-                    delete shiftsData[dateKey];
-                }
-            }
-
-            renderCalendar();
-        }
-
-        // --- Smart Text Parser Feature ---
-        function parseSmartInput() {
-            const text = smartPasteInput.value.trim();
-            if (!text) {
-                showToast('กรุณากรอกข้อความก่อนกดประมวลผล', 'warning');
+        // --- Direct Export to Google Calendar Web Link ---
+        function exportToGoogleCalendar() {
+            const keys = Object.keys(shiftsData);
+            if (keys.length === 0) {
+                showToast('ยังไม่มีข้อมูลเวรให้ลงบันทึก', 'warning');
                 return;
             }
 
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth() + 1;
-            let addedCount = 0;
+            const firstDateStr = keys[0];
+            const firstShift = shiftsData[firstDateStr][0];
+            const shiftInfo = SHIFT_TYPES[firstShift];
+            const [y, m, d] = firstDateStr.split('-');
 
-            // Simple Pattern Matching Algorithm
-            // Keywords: เช้า / บ่าย / ดึก followed by numbers
-            const sections = text.split(/(เช้า|บ่าย|ดึก|morning|afternoon|night)/i);
-
-            let currentParsedType = null;
-
-            for (let i = 0; i < sections.length; i++) {
-                const item = sections[i].trim().toLowerCase();
-                
-                if (item === 'เช้า' || item === 'morning') {
-                    currentParsedType = 'morning';
-                } else if (item === 'บ่าย' || item === 'afternoon') {
-                    currentParsedType = 'afternoon';
-                } else if (item === 'ดึก' || item === 'night') {
-                    currentParsedType = 'night';
-                } else if (currentParsedType && item) {
-                    // Extract numbers using Regex
-                    const numbers = item.match(/\b\d{1,2}\b/g);
-                    if (numbers) {
-                        numbers.forEach(numStr => {
-                            const dayNum = parseInt(numStr, 10);
-                            const totalDaysInMonth = new Date(year, month, 0).getDate();
-                            
-                            if (dayNum >= 1 && dayNum <= totalDaysInMonth) {
-                                const dateKey = formatDateKey(year, month, dayNum);
-                                let dayShifts = shiftsData[dateKey] ? [...shiftsData[dateKey]] : [];
-                                
-                                if (!dayShifts.includes(currentParsedType)) {
-                                    dayShifts.push(currentParsedType);
-                                    shiftsData[dateKey] = dayShifts;
-                                    addedCount++;
-                                }
-                            }
-                        });
-                    }
-                }
+            let startObj = new Date(parseInt(y), parseInt(m)-1, parseInt(d), shiftInfo.startHour, 0, 0);
+            let endObj = new Date(startObj);
+            if (shiftInfo.endHour === 24) {
+                endObj.setDate(endObj.getDate() + 1);
+                endObj.setHours(0,0,0);
+            } else {
+                endObj.setHours(shiftInfo.endHour, 0, 0);
             }
 
-            if (addedCount > 0) {
-                renderCalendar();
-                smartPasteInput.value = '';
-                showToast(`เพิ่มเวรสำเร็จ ${addedCount} รายการ!`, 'success');
+            const formatGTime = (date) => date.toISOString().replace(/-|:|\.\d\d\d/g, "");
+            const gUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(shiftInfo.label)}&dates=${formatGTime(startObj)}/${formatGTime(endObj)}&details=${encodeURIComponent('ปฏิบัติงาน ' + shiftInfo.label)}`;
+
+            if (keys.length === 1 && shiftsData[firstDateStr].length === 1) {
+                window.open(gUrl, '_blank');
+                showToast('กำลังเปิด Google Calendar...', 'success');
             } else {
-                showToast('ไม่พบรูปแบบวันที่ที่ถูกต้อง เช่น "เช้า 2, 5 บ่าย 8, 12"', 'warning');
+                // For multiple shifts, generate and launch ICS file
+                exportToICS(false);
             }
         }
 
-        // --- Export to iCalendar (.ics) File ---
-        function exportToICS() {
+        // --- Export to iCalendar (.ics) File / Data URI scheme ---
+        function exportToICS(isWebcal = false) {
             const keys = Object.keys(shiftsData);
             if (keys.length === 0) {
                 showToast('ยังไม่มีข้อมูลเวรให้ลงบันทึก', 'warning');
@@ -588,7 +787,7 @@
                 'PRODID:-//Shift Scheduler Assistant//TH',
                 'CALSCALE:GREGORIAN',
                 'METHOD:PUBLISH',
-                'X-WR-CALNAME:ตารางเวรของฉัน'
+                'X-WR-CALNAME:ตารางเวร'
             ];
 
             keys.forEach(dateStr => {
@@ -599,8 +798,6 @@
                     const shiftInfo = SHIFT_TYPES[shiftType];
                     if (!shiftInfo) return;
 
-                    // Format Start & End Dates
-                    // Handles midnight/next day boundary for afternoon/night shifts
                     let startYear = parseInt(y, 10);
                     let startMonth = parseInt(m, 10) - 1;
                     let startDay = parseInt(d, 10);
@@ -633,16 +830,24 @@
             });
 
             icsContent.push('END:VCALENDAR');
+            const icsString = icsContent.join('\r\n');
 
-            const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.setAttribute('download', `taraang-wen-${currentDate.getFullYear()}-${currentDate.getMonth() + 1}.ics`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            if (isWebcal) {
+                // Direct Data Scheme for iOS / Mac Calendar app trigger
+                const encodedData = encodeURIComponent(icsString);
+                window.location.href = `data:text/calendar;charset=utf8,${encodedData}`;
+                showToast('กำลังเปิดแอป Calendar บนมือถือ...', 'info');
+            } else {
+                const blob = new Blob([icsString], { type: 'text/calendar;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.setAttribute('download', `taraang-wen-${currentDate.getFullYear()}-${currentDate.getMonth() + 1}.ics`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
 
-            showToast('ดาวน์โหลดไฟล์ .ics เรียบร้อย! แตะเพื่อเปิดลง Calendar', 'success');
+                showToast('ดาวน์โหลดไฟล์ .ics เรียบร้อย! แตะเปิดไฟล์เพื่อลง Calendar', 'success');
+            }
         }
 
         // --- Utility Helpers ---
@@ -690,9 +895,16 @@
             }, 3000);
         }
 
+        // --- App Initialization ---
+        function initApp() {
+            setupShiftTypeSelector();
+            setupEventListeners();
+            renderCalendar();
+        }
+
         // --- Event Listeners Setup ---
         function setupEventListeners() {
-            // Month navigation
+            // Month Navigation
             prevMonthBtn.addEventListener('click', () => {
                 currentDate.setMonth(currentDate.getMonth() - 1);
                 renderCalendar();
@@ -708,32 +920,38 @@
                 renderCalendar();
             });
 
-            // Actions
+            // Fast Paste Action
             applySmartPasteBtn.addEventListener('click', parseSmartInput);
-            exportIcsBtn.addEventListener('click', exportToICS);
 
+            // Export Actions
+            if (exportShareBtn) exportShareBtn.addEventListener('click', shareToCalendarApp);
+            if (exportGoogleBtn) exportGoogleBtn.addEventListener('click', exportToGoogleCalendar);
+            if (exportIcsBtn) exportIcsBtn.addEventListener('click', exportToICS);
+            if (mobileExportBtn) mobileExportBtn.addEventListener('click', shareToCalendarApp);
+
+            // Clear Month Action
             clearMonthShiftsBtn.addEventListener('click', () => {
                 const year = currentDate.getFullYear();
                 const month = currentDate.getMonth() + 1;
-                const prefix = `${year}-${month < 10 ? '0' + month : month}`;
-
-                let count = 0;
-                Object.keys(shiftsData).forEach(key => {
-                    if (key.startsWith(prefix)) {
-                        delete shiftsData[key];
-                        count++;
+                
+                let deletedCount = 0;
+                Object.keys(shiftsData).forEach(dateKey => {
+                    const [y, m] = dateKey.split('-').map(Number);
+                    if (y === year && m === month) {
+                        delete shiftsData[dateKey];
+                        deletedCount++;
                     }
                 });
 
-                if (count > 0) {
+                if (deletedCount > 0) {
                     renderCalendar();
-                    showToast(`ล้างเวรในเดือนนี้ออกแล้ว (${count} วัน)`, 'info');
+                    showToast('ล้างเวรของเดือนนี้เรียบร้อยแล้ว', 'info');
                 } else {
-                    showToast('ไม่มีเวรในเดือนนี้ให้ล้าง', 'warning');
+                    showToast('ไม่มีรายการเวรในเดือนนี้', 'warning');
                 }
             });
 
-            // Modal Controls
+            // Modal Help Listeners
             quickHelpBtn.addEventListener('click', () => helpModal.classList.remove('hidden'));
             closeHelpBtn.addEventListener('click', () => helpModal.classList.add('hidden'));
             understandBtn.addEventListener('click', () => helpModal.classList.add('hidden'));
@@ -742,7 +960,7 @@
             });
         }
 
-        // Start App on Window Load
+        // Run application setup on page load
         window.onload = initApp;
     </script>
 </body>
